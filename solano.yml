@@ -1,0 +1,24 @@
+# Check installed Chrome versions
+hooks:
+  pre_setup: |
+    set -e 
+    # Move system chrome
+    sudo mkdir -p /usr/local/google-chrome-stable/system
+    sudo mv /opt/google/chrome/* /usr/local/google-chrome-stable/system/
+    sudo rm -rf /opt/google
+    cd /usr/bin && sudo ln -sf /usr/local/google-chrome-stable/system/google-chrome google-chrome
+    cd $TMPDIR
+    mkdir google-chrome-stable
+    wget http://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_57.0.2987.110-1_amd64.deb
+    dpkg-deb -x google-chrome-stable_57.0.2987.110-1_amd64.deb google-chrome-stable
+    sudo mkdir -p /usr/local/google-chrome-stable/57.0.2987.110-1
+    sudo mv google-chrome-stable/opt/google/chrome/* /usr/local/google-chrome-stable/57.0.2987.110-1/
+    rm -rf google-chrome-stable*
+tests:
+  - |
+    export OLDPATH=$PATH
+    for ver in `ls /usr/local/google-chrome-stable`; do
+      echo "Chrome dir: /usr/local/google-chrome-stable/$ver"
+      export PATH=/usr/local/google-chrome-stable/$ver:$OLDPATH
+      google-chrome --version
+    done
